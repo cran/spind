@@ -1,4 +1,4 @@
-971bbd52e3bc580cc625fea4f5adf2e8 *DESCRIPTION
+a30bd201cbf244556fcb15d1310a8d9b *DESCRIPTION
 6317352a708e0f12aa687ef0dec33bd5 *NAMESPACE
 af94048c641756a7a133b9f0d7b02887 *R/AIC_Calc.R
 856c69fdb7a8283df202cfb16cae8684 *R/GEE.R
@@ -30,9 +30,10 @@ ce859fd5e22dfe5e4acdd4fea81acdb7 *build/vignette.rds
 61b7a5aba62616ec55debefd95b0e75b *data/carlinadata.rda
 cfd3c36baf85966c1774aa7b56bf191e *data/hook.rda
 b1b9eb97d3d4006a10d938ede6ac9726 *data/musdata.rda
-75afb6b3d1d23795e3ea6da1951eaf8f *inst/doc/spind_vignette.R
-996f1c0d7572aff4f988e22dd0ae3f41 *inst/doc/spind_vignette.Rmd
-c2e3a22b79d3920fc4e8c42dbddd4713 *inst/doc/spind_vignette.html
+b7e6c141017583fabd7572c38f3c8ded *inst/CITATION
+4ddb75dbdd92b356055dbe389358b73b *inst/doc/spind_vignette.R
+0b5d379f8f65ade51fcf53ef07b0f7b8 *inst/doc/spind_vignette.Rmd
+a78592f109133ba74376a475a7036e14 *inst/doc/spind_vignette.html
 cf67ae6234915b1dbea990681a4c3c27 *man/GEE.Rd
 f3e4745e1c5de7280b6b0dd694d29dc0 *man/WRM.Rd
 c5c5c3e18d447c05f3d4e150ba4f9a6f *man/acfft.Rd
@@ -58,4 +59,4 @@ d519f63ec8926bd632755903cc06ca5d *man/summary.GEE.Rd
 cecf02215781582a34693848037baf1b *man/upscale.Rd
 4be05e9c499be47fec1618cc28b98acb *man/wavecovar.Rd
 63b296e75e9b2e64090667e7e3c47719 *man/wavevar.Rd
-cbdbb88dd651eaf3f36b94aabe25ff31 *vignettes/spind_vignette.Rmd
+0b5d379f8f65ade51fcf53ef07b0f7b8 *vignettes/spind_vignette.Rmd
