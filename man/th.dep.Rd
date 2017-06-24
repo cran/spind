@@ -42,17 +42,17 @@ an observational data set and model predictions (Kappa and confusion matrix)
 }
 \examples{
 data(hook)
-data<-hook[,1:2]
-coord<-hook[,3:4]
-si1<-th.dep(data,coord,spatial=TRUE)
+data <- hook[ ,1:2]
+coord <- hook[ ,3:4]
+si1 <- th.dep(data, coord, spatial = TRUE)
 si1$kappa
 si1$cm
 
 }
 \references{
-Carl G, Kuehn I (2016)
-Spind: a package for computing spatially corrected accuracy measures.
-Ecography. DOI: 10.1111/ecog.02593
+Carl G, Kuehn I (2017) Spind: a package for computing
+spatially corrected accuracy measures.
+Ecography 40: 675-682. doi: 10.1111/ecog.02593
 }
 \seealso{
 \code{\link{th.indep}}

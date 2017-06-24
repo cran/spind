@@ -4,25 +4,21 @@
 \alias{wavecovar}
 \title{Wavelet covariance analysis}
 \usage{
-wavecovar(f1, f2, x, y, wavelet = "haar", wtrafo = "dwt", plot = FALSE)
+wavecovar(f1, f2, coord, wavelet = "haar", wtrafo = "dwt")
 }
 \arguments{
 \item{f1}{A vector of length \emph{n}.}
 
 \item{f2}{A vector of length \emph{n}.}
 
-\item{x}{Corresponding x-coordinates which have to be integer.}
-
-\item{y}{Corresponding y-coordinates which have to be integer.}
+\item{coord}{A matrix of two columns with corresponding cartesian
+coordinates. Currently only supports integer coordinates.}
 
 \item{wavelet}{Name of wavelet family. \code{haar}, \code{d4}, and \code{la8}.
 are possible. \code{haar} is the default.}
 
 \item{wtrafo}{Type of wavelet transform. Either \code{dwt} or \code{modwt}.
 \code{dwt} is the default.}
-
-\item{plot}{A logical indicating whether to plot the wavelet covariance. Default
-is FALSE}
 }
 \value{
 Wavelet covariance for \code{f1} and \code{f2}.
@@ -30,6 +26,13 @@ Wavelet covariance for \code{f1} and \code{f2}.
 \description{
 Calculates the wavelet covariance based on a wavelet
 multiresolution analysis.
+}
+\examples{
+data(carlinadata)
+coords<-carlinadata[,4:5]
+pc<-covar.plot(carlina.horrida~aridity+land.use,carlinadata,coords,
+               wavelet='d4',wtrafo='modwt',plot='covar')
+
 }
 \seealso{
 \pkg{waveslim}, \code{\link{WRM}}, \code{\link{covar.plot}},

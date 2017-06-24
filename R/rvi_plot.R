@@ -22,6 +22,7 @@
 #' @param wavelet  Type of wavelet: \code{haar}, \code{d4}, or \code{la8}
 #' @param wtrafo   Type of wavelet transform: \code{dwt} or \code{modwt}
 #' @param n.eff    A numeric value of effective sample size
+#' @param trace Should R print progress updates to the console? Default is FALSE
 #'
 #' @return A matrix containing the relative importance of each variable
 #' in the regression at each value of the scale level.
@@ -43,76 +44,115 @@
 #' rvi.plot(carlina.horrida ~ aridity + land.use,"poisson",
 #'          carlinadata,coords,maxlevel=4,detail=TRUE,wavelet="d4")
 #'}
+#' @import ggplot2
 #' @export
 
 
-rvi.plot<-function(formula,family,data,coord,maxlevel,detail=TRUE,
-wavelet="haar",wtrafo="dwt",n.eff=NULL){
+rvi.plot <- function(formula, family, data, coord, maxlevel, detail = TRUE,
+                     wavelet = "haar", wtrafo = "dwt",
+                     n.eff = NULL, trace = FALSE){
+  if(trace){
+    cat("\n","Model selection tables:","\n","\n")
+  }
 
-  cat("\n","Model selection tables:","\n","\n")
+  wrm <- WRM(formula, family, data, coord, level = 1,
+            wavelet = wavelet, wtrafo = wtrafo)
 
+  mmi <- mmiWMRR(wrm, data, scale = 1, detail = detail)
 
-  wrm<- WRM(formula,family,data,coord,level=1,
-            wavelet=wavelet,wtrafo=wtrafo)
+  nrowA <- dim(mmi$result)[1]
+  ncolA <- dim(mmi$result)[2]
 
-  mmi<-mmiWMRR(wrm,data,scale=1,detail=detail)
+  nvar <- dim(mmi$result)[2] - 6
+  leg <- dimnames(mmi$result)[[2]][2:(nvar + 1)]
 
-  nrowA<-dim(mmi$result)[1]
-  ncolA<-dim(mmi$result)[2]
+  A <- array(NA, c(nrowA, ncolA, maxlevel))
+  level <- rep(NA, maxlevel)
+  A[ , ,1] <- mmi$result
+  level[1] <- mmi$level
 
-  nvar<-dim(mmi$result)[2]-6
-  leg<-dimnames(mmi$result)[[2]][2:(nvar+1)]
-
-  A<-array(NA,c(nrowA,ncolA,maxlevel))
-  level<-rep(NA,maxlevel)
-  A[,,1]<-mmi$result
-  level[1]<-mmi$level
-
-  if(maxlevel>=2){
+  if(maxlevel >= 2){
     for (i in 2:maxlevel) {
-      mmi<-mmiWMRR(wrm,data,scale=i,detail=detail)
-      A[,,i]<-mmi$result
-      level[i]<-mmi$level
+      mmi <- mmiWMRR(wrm, data, scale = i, detail = detail, trace = trace)
+      A[ , ,i] <- mmi$result
+      level[i] <- mmi$level
     }
   }
 
-  # Plot: scale-dependent relative variable importance
-  cat("\n","---","\n","Relative variable importance:","\n","\n")
+  if(trace){
+    cat("\n","---","\n","Relative variable importance:","\n","\n")
+  }
 
-  klimitscale<-dim(A)[3]
-  ip<-dim(A)[1]
+  klimitscale <- dim(A)[3]
+  ip <- dim(A)[1]
 
-  WeightSums<-matrix(NA,nvar,klimitscale)
-  for (kscale in 1:klimitscale){
-    for(kvar in 2:(nvar+1)){
-      for (i in 1: ip){
-        if(!is.na(A[i,kvar,kscale])) A[i,kvar,kscale]<-A[i,(nvar+6),kscale]
+  WeightSums <- matrix(NA, nvar, klimitscale)
+  for(kscale in 1:klimitscale){
+    for(kvar in 2:(nvar + 1)){
+      for (i in 1:ip){
+        if(!is.na(A[i, kvar, kscale])){
+          A[i, kvar, kscale] <- A[i, (nvar + 6), kscale]
+        }
       }
     }
-    B<-A[1:ip,2:(nvar+1),kscale]
-    WeightSums[,kscale]<-colSums(B,na.rm=TRUE)
+    B <- A[1:ip, 2:(nvar + 1), kscale]
+    WeightSums[ ,kscale] <- colSums(B, na.rm = TRUE)
   } # kscale
 
-  vec<-1:nvar
+  vec <- 1:nvar
 
-  plot(level,WeightSums[1,],type="b",ylim=c(0,2),
-       xlim=c(min(level),max(level)),ylab="Relative Variable Importance",
-       xlab="Level", pch=2,lty=vec[1],lwd=2)
+  VarCol <- character()
+  Level <- rep(1:maxlevel, length(leg))
 
-  for (kvar in 2:nvar) {
-    points(level,WeightSums[kvar,],type="b",pch=kvar+1,
-           lty=vec[kvar],lwd=2)
+  for(i in 1:length(leg)){
+    tempdata <- rep(leg[i], maxlevel)
+    VarCol <- c(VarCol, tempdata)
   }
 
-  #leg<-dimnames(mmi$res)[[2]][vec+1]
-  v<-2:(nvar+1)
-  legend('topright',leg,pch=v,lty=vec,lwd=2)
 
-  rownames(WeightSums)<-leg
-  colnames(WeightSums)<-paste("level",c(1:klimitscale),sep="=")
-  print(WeightSums)
+  PltData <- data.frame(Variable = VarCol, Level = Level,
+                        Weight = as.vector(t(WeightSums)))
 
-  fit<-list(rvi=WeightSums)
+  plt.blank <-  theme(panel.grid.major = element_blank(),
+                      panel.grid.minor = element_blank(),
+                      panel.background = element_blank(),
+                      axis.line = element_line(colour = "black"))
+
+  Plt <- ggplot(PltData, aes_(x = quote(Level), y = quote(Weight))) +
+         plt.blank +
+         geom_point(aes_(colour = quote(Variable),
+                         shape = quote(Variable)), size = 3) +
+         geom_line(aes_(colour = quote(Variable)), linetype = 2,
+                   size = 1) +
+         scale_x_continuous("Level", breaks = 1:maxlevel) +
+         scale_y_continuous("Relative Variable Importance",
+                            breaks = seq(0, max(WeightSums),
+                                         length.out = 6))
+
+  print(Plt)
+
+  # plot(level, WeightSums[1, ], type = "b", ylim = c(0,2),
+  #      xlim = c(min(level), max(level)),
+  #      ylab = "Relative Variable Importance",
+  #      xlab = "Level", pch = 2, lty = vec[1], lwd = 2)
+  #
+  # for (kvar in 2:nvar){
+  #   points(level, WeightSums[kvar, ], type = "b", pch = kvar + 1,
+  #          lty = vec[kvar], lwd = 2)
+  # }
+  #
+  # #leg<-dimnames(mmi$res)[[2]][vec+1]
+  # v <- 2:(nvar + 1)
+  # legend('topright', leg, pch = v, lty = vec, lwd = 2)
+
+  rownames(WeightSums) <- leg
+  colnames(WeightSums) <- paste("level", c(1:klimitscale), sep = "=")
+  # Plot: scale-dependent relative variable importance
+  if(trace){
+    print(WeightSums)
+  }
+
+  fit <- list(rvi = WeightSums)
 
 }
 
