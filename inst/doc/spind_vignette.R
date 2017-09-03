@@ -1,5 +1,6 @@
 ## ----Library call, echo=FALSE--------------------------------------------
 library(spind)
+library(ggplot2)
 
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
@@ -20,7 +21,8 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 coords <- musdata[ ,4:5]
 
 mgee <- GEE(musculus ~ pollution + exposure, family = "poisson", data = musdata,
-            coord = coords, corstr = "fixed", plot = TRUE, scale.fix = FALSE)
+            coord = coords, corstr = "fixed", plot = TRUE, scale.fix = FALSE,
+            customize_plot = scale_color_manual("Custom Legend", values = c('green', 'black')))
 
 summary(mgee, printAutoCorPars = TRUE)
 

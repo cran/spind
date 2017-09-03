@@ -1,6 +1,6 @@
 Package: spind
 Title: Spatial Methods and Indices
-Version: 2.1.0
+Version: 2.1.1
 Author: Gudrun Carl [cre, aut], Ingolf Kuehn [aut], Sam Levin [aut]
 Maintainer: Sam Levin <levisc8@gmail.com>
 URL: https://github.com/levisc8/spind
@@ -19,6 +19,6 @@ RoxygenNote: 6.0.1
 Suggests: knitr, rmarkdown, testthat, PresenceAbsence
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2017-06-24 12:45:17 UTC; sl13sise
+Packaged: 2017-09-03 15:16:48 UTC; sl13sise
 Repository: CRAN
-Date/Publication: 2017-06-24 21:41:04 UTC
+Date/Publication: 2017-09-03 15:27:18 UTC
