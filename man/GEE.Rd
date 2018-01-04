@@ -11,10 +11,11 @@ GEE(formula, family, data, coord, corstr = "fixed", cluster = 3,
 \arguments{
 \item{formula}{Model formula. Variable names must match variables in \code{data}.}
 
-\item{family}{\code{gaussian}, \code{binomial}, or \code{poisson} are supported. Called using
-a quoted character string (i.e. \code{family} = "gaussian").}
+\item{family}{\code{gaussian}, \code{binomial}, or \code{poisson} are supported.
+Called using a quoted character string (i.e. \code{family} = "gaussian").}
 
-\item{data}{A data frame with variable names that match the variables specified in \code{formula}.}
+\item{data}{A data frame with variable names that match the variables
+specified in \code{formula}.}
 
 \item{coord}{A matrix of two columns with corresponding cartesian
 coordinates. Currently only supports integer coordinates.}
@@ -111,6 +112,8 @@ As a spatial model, it is a generalized linear model in which the residuals
 may be autocorrelated. It accounts for spatial (2-dimensional)
 autocorrelation of the residuals in cases of regular gridded datasets
 and returns corrected parameter estimates. The grid cells are assumed to be square.
+Futhermore, this function requires that \strong{all predictor variables
+be continuous}.
 }
 \note{
 When using \code{corstr = "fixed"} on large data sets, the function

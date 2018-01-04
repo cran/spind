@@ -22,7 +22,7 @@
 #' ac
 #'
 #' @author Gudrun Carl
-
+#' @importFrom stats convolve
 #' @export
 acfft<-function(coord, f, lim1 = 1, lim2 = 2, dmax = 10){
 
@@ -42,7 +42,7 @@ acfft<-function(coord, f, lim1 = 1, lim2 = 2, dmax = 10){
   n2<-n*n
   Ares<-matrix(0,n,n)
   mask<-matrix(0,n,n)
-  for(i in 1:length(x)){
+  for(i in seq_len(length(x))){
     kx<-x[i]-min(x)+1
     ky<-y[i]-min(y)+1
     Ares[ky,kx]<-reslm[i]
@@ -50,7 +50,9 @@ acfft<-function(coord, f, lim1 = 1, lim2 = 2, dmax = 10){
   filter1<-matrix(0,n,n)
   filter1[1,1]<-1
   leng<-length(reslm)
-  ne<-convolve(convolve(Ares,filter1),Ares)[1,1]/leng
+  ne<-stats::convolve(stats::convolve(Ares,
+                                      filter1),
+                      Ares)[1,1]/leng
   n3<-3*n
   Ares0<-matrix(0,n3,n3)
   Ares1<-matrix(0,n3,n3)
@@ -79,8 +81,12 @@ acfft<-function(coord, f, lim1 = 1, lim2 = 2, dmax = 10){
       if(lim1!=0 & d>=gr & d<gr1) filter[ny[i],nx[i]]<-1
       if(lim1==0 & d>gr & d<=gr1) filter[ny[i],nx[i]]<-1}
 
-    sum<-convolve(convolve(maske0,filter),maske1)[1,1]
-    za<-convolve(convolve(Ares0,filter),Ares1)[1,1]/sum
+    sum<-stats::convolve(stats::convolve(maske0,
+                                         filter),
+                         maske1)[1,1]
+    za<-stats::convolve(stats::convolve(Ares0,
+                                        filter),
+                        Ares1)[1,1]/sum
     corr[kk]<-za/ne
     gr<-gr+(lim2-lim1)
     gr1<-gr1+(lim2-lim1)

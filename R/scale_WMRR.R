@@ -2,8 +2,10 @@
 #'
 #' @description
 #' scaleWMRR performs a scale-specific regression based on a
-#' wavelet multiresolution analysis. It  fits
-#' generalized linear models while taking the two-dimensional grid structure of
+#' wavelet multiresolution analysis.
+#'
+#' @details This function fits generalized linear models while taking the
+#' two-dimensional grid structure of
 #' datasets into account. The following error distributions (in
 #' conjunction with appropriate link functions) are allowed: \code{gaussian},
 #' \code{binomial}, or \code{poisson}. The model provides scale-specific
@@ -11,6 +13,9 @@
 #' dataset is assumed to be regular gridded and the grid cells are
 #' assumed to be square. A function from the package 'waveslim' is used
 #' for the wavelet transformations (Whitcher, 2005).
+#' Futhermore, this function requires that \strong{all predictor variables
+#' be continuous}.
+#'
 #'
 #'
 #' @param formula  With specified notation according to names in data frame.
@@ -107,6 +112,10 @@
 #' Whitcher, B. (2005) Waveslim: basic wavelet routines for one-, two-
 #' and three-dimensional signal processing. R package version 1.5.
 #'
+#'@importFrom stats model.matrix model.frame as.formula lm glm resid
+#' pt pnorm
+#'@importFrom waveslim mra.2d
+#'@importFrom MASS ginv
 #'@export
 
 
@@ -126,17 +135,17 @@ scaleWMRR<-function(formula,family,data,coord,
   if(!logic1 | !logic2) stop("coordinates not integer")
   converged.logi<-TRUE
 
-  X<-model.matrix(formula,data)
+  X<-stats::model.matrix(formula,data)
   nvar<-dim(X)[2]
 
-  if(is.vector(model.frame(formula,data)[[1]])){
-    yold<-model.frame(formula,data)[[1]]
+  if(is.vector(stats::model.frame(formula,data)[[1]])){
+    yold<-stats::model.frame(formula,data)[[1]]
     ntr<-1
   }
-  if(family=="binomial" & is.matrix(model.frame(formula,data)[[1]])){
-    yold<-model.frame(formula,data)[[1]][,1]
-    ntr<-model.frame(formula,data)[[1]][,1] +
-      model.frame(formula,data)[[1]][,2]
+  if(family=="binomial" & is.matrix(stats::model.frame(formula,data)[[1]])){
+    yold<-stats::model.frame(formula,data)[[1]][,1]
+    ntr<-stats::model.frame(formula,data)[[1]][,1] +
+      stats::model.frame(formula,data)[[1]][,2]
   }
 
   n.level<-scale
@@ -193,8 +202,8 @@ scaleWMRR<-function(formula,family,data,coord,
     }
 
     # GLM for comparison
-    m0<-glm(formula,family,data)
-    res0<-resid(m0,type="pearson")
+    m0<-stats::glm(formula,family,data)
+    res0<-stats::resid(m0,type="pearson")
     beta0<-m0$coeff
 
     if(is.null(b.ini)){
@@ -227,7 +236,7 @@ scaleWMRR<-function(formula,family,data,coord,
 
       FMat<-matrix(0,2^power,2^power)
       TArray<-array(0,c(2^power,2^power,nvar))
-      for(ii in 1:n){
+      for(ii in seq_len(n)){
         kx<-x[ii]+xmargin
         ky<-y[ii]+ymargin
         FMat[ky,kx]<-ynew[ii]
@@ -239,10 +248,10 @@ scaleWMRR<-function(formula,family,data,coord,
       P<-which(is.na(TArray), arr.ind = TRUE)
       if(padform==0){
         FMat[is.na(FMat)]<-0
-        for (i3 in 1:nvar){
+        for (i3 in seq_len(nvar)){
           i1<-P[which(P[,3]==i3),1]
           i2<-P[which(P[,3]==i3),2]
-          for(i in 1:length(i1)){
+          for(i in seq_len(length(i1))){
             TArray[i1[i],i2[i],i3]<-0
           }
         }
@@ -250,10 +259,10 @@ scaleWMRR<-function(formula,family,data,coord,
 
       if(padform==1){
         FMat[is.na(FMat)]<-mean(FMat, na.rm=TRUE)
-        for (i3 in 1:nvar){
+        for (i3 in seq_len(nvar)){
           i1<-P[which(P[,3]==i3),1]
           i2<-P[which(P[,3]==i3),2]
-          for(i in 1:length(i1)){
+          for(i in seq_len(length(i1))){
             TArray[i1[i],i2[i],i3]<-mean(TArray[,,i3], na.rm=TRUE)
           }
         }
@@ -261,7 +270,7 @@ scaleWMRR<-function(formula,family,data,coord,
 
       if(padform==2){
         FMat<-padding(FMat)
-        for (i3 in 1:nvar) TArray[,,i3]<-padding(TArray[,,i3])
+        for (i3 in seq_len(nvar)) TArray[,,i3]<-padding(TArray[,,i3])
       }
 
       p<-2^power*2^power
@@ -277,15 +286,15 @@ scaleWMRR<-function(formula,family,data,coord,
 
       FT<-waveslim::mra.2d(FMat,wavelet,n.level,method=wtrafo)
       FTS<-rep(0,length(FT[[1]]))
-      for(is in 1:length(s)){
+      for(is in seq_len(length(s))){
         if(s[is]==1) FTS <- FTS + FT[[is]]
       }
 
       ft<-as.vector(FTS)
-      for (i3 in 1:nvar){
+      for (i3 in seq_len(nvar)){
         TT<-waveslim::mra.2d(TArray[,,i3],wavelet,n.level,method=wtrafo)
         TTS<-rep(0,length(TT[[1]]))
-        for(is in 1:length(s)){
+        for(is in seq_len(length(s))){
           if(s[is]==1){
             TTS <- TTS + TT[[is]]
           }
@@ -294,8 +303,8 @@ scaleWMRR<-function(formula,family,data,coord,
       }
 
       xnam<-paste("tt[,",1:nvar,"]",sep="")
-      formula.dwt<-as.formula(paste("ft~",paste(xnam,collapse="+"),"-1"))
-      mdwt<-lm(formula.dwt)
+      formula.dwt<-stats::as.formula(paste("ft~",paste(xnam,collapse="+"),"-1"))
+      mdwt<-stats::lm(formula.dwt)
       if(sum(abs(tt[,1]))==0) mdwt$coeff[1]<-beta0[1]
       if(max(abs(mdwt$coeff),na.rm=TRUE)>1e+10 ) {
         mdwt$coeff<-rep(NA,nvar);break}
@@ -328,7 +337,7 @@ scaleWMRR<-function(formula,family,data,coord,
     if(sum(abs(tt[,1]))!=0 & !is.na(mdwt$coeff[1])){
       Resmdwt<-matrix(resid(mdwt),2^power,2^power)
       resmdwt<-rep(0,n)
-      for(i in 1:n) resmdwt[i]<-Resmdwt[y[i]+ymargin,x[i]+xmargin]
+      for(i in seq_len(n)) resmdwt[i]<-Resmdwt[y[i]+ymargin,x[i]+xmargin]
       if(trace) {
         acw<-acfft(coord,resmdwt,lim1,lim2)
       }
@@ -337,7 +346,7 @@ scaleWMRR<-function(formula,family,data,coord,
         acpw<-NA
       }
       if(scale==0) df<-n-nvar
-      if(scale!=0) df<-round(n/4^(n.level-1)) -nvar
+      if(scale!=0) df<-round(n/4^(n.level-1)) - nvar
 
       if(family=="binomial" | family=="poisson"){
         if(scale==0) var.b<-MASS::ginv(t(tt)%*%tt)
@@ -350,13 +359,15 @@ scaleWMRR<-function(formula,family,data,coord,
         var.b<-sigma2*var.b
       }
       s.e.<-rep(NA,nvar)
-      for(i in 1:nvar){
+      for(i in seq_len(nvar)){
         s.e.[i]<-sqrt(var.b[i,i])
       }
     }
 
     if(sum(abs(tt[,1]))==0 | is.na(mdwt$coeff[1])) {
-      acw<-NA; resmdwt<-NA; s.e.<-NA
+      acw<-NA
+      resmdwt<-NA
+      s.e.<-NA
     }
 
     beta[i4,1:nvar]<-mdwt$coeff[1:nvar]
@@ -385,14 +396,14 @@ scaleWMRR<-function(formula,family,data,coord,
   pr<-rep(NA,nvar)
   if(sum(abs(tt[,1]))!=0 & !is.na(wavelet.beta[1])) {
     z.value<-wavelet.beta/s.e.
-    for(i in 1:nvar){
+    for(i in seq_len(nvar)){
       if(family=="gaussian"){
-        if(z.value[i]<=0) pr[i]<-2*pt(z.value[i],df)
-        if(z.value[i]>0) pr[i]<-2*(1-pt(z.value[i],df))
+        if(z.value[i]<=0) pr[i]<-2*stats::pt(z.value[i],df)
+        if(z.value[i]>0) pr[i]<-2*(1-stats::pt(z.value[i],df))
       }
       if(family=="binomial" | family=="poisson"){
-        if(z.value[i]<=0) pr[i]<-2*pnorm(z.value[i])
-        if(z.value[i]>0) pr[i]<-2*(1-pnorm(z.value[i]))
+        if(z.value[i]<=0) pr[i]<-2*stats::pnorm(z.value[i])
+        if(z.value[i]>0) pr[i]<-2*(1-stats::pnorm(z.value[i]))
       }
     }
   }

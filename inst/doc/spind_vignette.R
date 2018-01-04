@@ -104,7 +104,7 @@ wrm <- WRM(carlina.horrida ~ aridity + land.use, family = "poisson",
 
 ms1 <- scaleWMRR(carlina.horrida ~ aridity + land.use, family = "poisson",
                  data = carlinadata, coord = coords, scale = 1,
-                 wavelet = 'd4', trace = F)
+                 wavelet = 'd4', trace = FALSE)
 
 mmi <- mmiWMRR(wrm, data = carlinadata, scale = 1, detail = TRUE)
 

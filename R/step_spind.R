@@ -53,7 +53,7 @@
 #' @references
 #' Hardin, J.W. & Hilbe, J.M. (2003) Generalized Estimating Equations. Chapman and Hall, New York.
 #'
-#' @seealso \code{\link{qic.calc}}, \code{\link{aic.calc}}, \code{\link[stats]{drop1}},
+#' @seealso \code{\link{qic.calc}}, \code{\link{aic.calc}}, \code{\link[stats]{add1}},
 #' \code{\link[stats]{step}}, \code{\link[MASS]{stepAIC}}
 #'
 #' @author Sam Levin
@@ -83,6 +83,8 @@
 #' summary(best.mgee,printAutoCorPars=FALSE)
 #'}
 #'
+#' @importFrom stats terms update.formula as.formula
+#' @importFrom stringr str_detect fixed
 #' @export
 #'
 
@@ -90,7 +92,7 @@
 step.spind<-function (object, data, steps = NULL, trace = TRUE, AICc = FALSE){
 
   # All models
-  scope <- attr(terms(object$formula),
+  scope <- attr(stats::terms(object$formula),
                 "term.labels")
   model <- class(object)
   family <- object$family
@@ -134,7 +136,8 @@ step.spind<-function (object, data, steps = NULL, trace = TRUE, AICc = FALSE){
     for (i in seq_len(ns)) {
       tt <- scope[i]
 
-      nfit <- update.formula(object$formula, as.formula(paste("~ . -", tt)))
+      nfit <- stats::update.formula(object$formula,
+                                    stats::as.formula(paste("~ . -", tt)))
       newmod <- WRM(nfit, family, data, coord, level = level,
                   wavelet = wavelet, wtrafo = wtrafo, b.ini = b.ini,
                   pad = pad, control = control, moran.params = moran.params)
@@ -144,7 +147,7 @@ step.spind<-function (object, data, steps = NULL, trace = TRUE, AICc = FALSE){
                       LogLik = ans[ ,1],
                       AIC = ans[ ,2],
                       AICc = ans[ ,3],
-                      stringsAsFactors = F)
+                      stringsAsFactors = FALSE)
 
     rownames(aod) <- 1:dim(aod)[1]
     if(AICc){
@@ -168,7 +171,8 @@ step.spind<-function (object, data, steps = NULL, trace = TRUE, AICc = FALSE){
     for (i in seq_len(ns)) {
       tt <- scope[i]
 
-      nfit <- update.formula(object$formula, as.formula(paste("~ . -", tt)))
+      nfit <- stats::update.formula(object$formula,
+                                    stats::as.formula(paste("~ . -", tt)))
       newmod <- suppressWarnings({
         GEE(nfit, family, data, coord, corstr = corstr,
             cluster = cluster, moran.params = moran.params,
@@ -179,14 +183,17 @@ step.spind<-function (object, data, steps = NULL, trace = TRUE, AICc = FALSE){
     aod <- data.frame(Deleted.Vars = rownames(ans),
                       Quasi.Lik = ans[ ,2],
                       QIC = ans[ ,1],
-                      stringsAsFactors = F)
+                      stringsAsFactors = FALSE)
 
     rownames(aod) <- 1:dim(aod)[1]
     best.mod <- aod$Deleted.Vars[which(aod$QIC == min(aod$QIC))]
   }
 
   if(trace){
-    cat('Iteration: ',it,'\n','Single term deletions\n','Deleted Term: ', best.mod,
+    cat('Iteration: ',
+        it,
+        '\n','Single term deletions\n','Deleted Term: ',
+        best.mod,
         '\n -------------------- \n')
     print(aod)
     cat('\n')
@@ -204,8 +211,10 @@ step.spind<-function (object, data, steps = NULL, trace = TRUE, AICc = FALSE){
     while(it <= steps){
       it <- it + 1
       aod1 <- aod
-      newstart <- update.formula(use.formula, as.formula(paste('~ . -', best.mod)))
-      vars <- attr(terms(newstart), 'term.labels')
+      newstart <- stats::update.formula(use.formula,
+                                        stats::as.formula(paste('~ . -',
+                                                  best.mod)))
+      vars <- attr(stats::terms(newstart), 'term.labels')
       for(i in unique(base.terms)){
         # extract hierarchical variables if there are any
         mod.hier <- vars[stringr::str_detect(vars, stringr::fixed(i))]
@@ -225,17 +234,23 @@ step.spind<-function (object, data, steps = NULL, trace = TRUE, AICc = FALSE){
           best.mod <- new.best.mod
           if(new.best.mod == '<none>') break
 
-          newstart <- update.formula(use.formula, paste("~ . -",new.best.mod))
-          cat('-----\nModel hierarchy violated by last removal\nNew Deleted Term: ',
-              new.best.mod,'\nPreviously deleted term added back into model\n-----\n')
+          newstart <- stats::update.formula(use.formula,
+                                            paste("~ . -",
+                                                  new.best.mod))
+          cat('-----\nModel hierarchy violated by last removal\n',
+              'New Deleted Term: ',
+              new.best.mod,
+              '\nPreviously deleted term added back into model\n-----\n')
         }
       }
 
-      ns <- length(attr(terms(newstart), 'term.labels'))
+      ns <- length(attr(stats::terms(newstart), 'term.labels'))
 
       if(model == "WRM"){
         ans <- matrix(nrow = ns + 1L, ncol = 3L,
-                      dimnames = list(c("<none>", attr(terms(newstart), 'term.labels')),
+                      dimnames = list(c("<none>",
+                                        attr(stats::terms(newstart),
+                                             'term.labels')),
                                       c("loglik", "inf.crit1", "inf.crit2")))
         newwrm <- WRM(newstart, family, data, coord, level = level,
                     wavelet = wavelet, wtrafo = wtrafo, b.ini = b.ini,
@@ -244,9 +259,10 @@ step.spind<-function (object, data, steps = NULL, trace = TRUE, AICc = FALSE){
         ans[1, ] <- c(newwrm$LogLik, newwrm$AIC, newwrm$AICc)
 
         for (i in seq_len(ns)) {
-          tt <- attr(terms(newstart), 'term.labels')[i]
+          tt <- attr(stats::terms(newstart), 'term.labels')[i]
 
-          nfit <- update.formula(newstart, as.formula(paste("~ . -", tt)))
+          nfit <- stats::update.formula(newstart,
+                                        stats::as.formula(paste("~ . -", tt)))
           newmod <- WRM(nfit, family, data, coord, level = level,
                       wavelet = wavelet, wtrafo = wtrafo, b.ini = b.ini,
                       pad = pad, control = control, moran.params = moran.params)
@@ -256,7 +272,7 @@ step.spind<-function (object, data, steps = NULL, trace = TRUE, AICc = FALSE){
                           LogLik = ans[, 1],
                           AIC = ans[, 2],
                           AICc = ans[, 3],
-                          stringsAsFactors = F)
+                          stringsAsFactors = FALSE)
 
         rownames(aod) <- 1:dim(aod)[1]
         if(AICc){
@@ -271,7 +287,9 @@ step.spind<-function (object, data, steps = NULL, trace = TRUE, AICc = FALSE){
           scale.fix<-TRUE
         }
         ans <- matrix(nrow = ns + 1L, ncol = 2L,
-                      dimnames = list(c("<none>", attr(terms(newstart), 'term.labels')),
+                      dimnames = list(c("<none>",
+                                        attr(stats::terms(newstart),
+                                             'term.labels')),
                                       c("inf.crit1", "qlik")))
         newGEE <- suppressWarnings({
           GEE(newstart, family, data, coord, corstr = corstr,
@@ -280,8 +298,10 @@ step.spind<-function (object, data, steps = NULL, trace = TRUE, AICc = FALSE){
         })
         ans[1, ] <- c(newGEE$QIC, newGEE$QLik)
         for (i in seq_len(ns)) {
-          tt <- attr(terms(newstart), 'term.labels')[i]
-          nfit <- update.formula(newstart, as.formula(paste("~ . -", tt)))
+          tt <- attr(stats::terms(newstart), 'term.labels')[i]
+          nfit <- stats::update.formula(newstart,
+                                        stats::as.formula(paste("~ . -",
+                                                                tt)))
           newmod <- suppressWarnings({
             GEE(nfit, family, data, coord, corstr = corstr,
                 cluster = cluster, moran.params = moran.params,
@@ -292,7 +312,7 @@ step.spind<-function (object, data, steps = NULL, trace = TRUE, AICc = FALSE){
         aod <- data.frame(Deleted.Vars = rownames(ans),
                           Quasi.Lik = ans[ ,2],
                           QIC = ans[ ,1],
-                          stringsAsFactors = F)
+                          stringsAsFactors = FALSE)
         rownames(aod) <- 1:dim(aod)[1]
         best.mod <- aod$Deleted.Vars[which(aod$QIC == min(aod$QIC))]
       }
@@ -302,7 +322,12 @@ step.spind<-function (object, data, steps = NULL, trace = TRUE, AICc = FALSE){
       aod1 <- aod
       newvars <- setdiff(vars,best.mod)
       if(trace){
-        cat('Iteration: ',it,'\n','Single term deletions\n','Deleted Term: ', best.mod,
+        cat('Iteration: ',
+            it,
+            '\n',
+            'Single term deletions\n',
+            'Deleted Term: ',
+            best.mod,
             '\n -------------------- \n')
         print(aod)
         cat('\n')

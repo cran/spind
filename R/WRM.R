@@ -11,6 +11,9 @@
 #' may be autocorrelated. It corrects for  2-dimensional residual
 #' autocorrelation for regular gridded data sets using the wavelet
 #' decomposition technique. The grid cells are assumed to be square.
+#' Futhermore, this function requires that \strong{all predictor variables
+#' be continuous}.
+#'
 #'
 #' @param formula  Model formula. Variable names must match variables in \code{data}.
 #' @param family   \code{gaussian}, \code{binomial}, or \code{poisson} are supported.
@@ -118,7 +121,11 @@
 #' summary(mwrm)
 #'}
 #' @author Gudrun Carl, Sam Levin
-#' @import ggplot2
+#' @importFrom ggplot2 theme element_blank element_line element_text
+#' ggplot aes_ geom_line geom_point scale_color_manual
+#' scale_x_continuous scale_y_continuous
+#' @importFrom stats glm resid as.formula pt pnorm
+#' @importFrom waveslim mra.2d
 #' @export
 
 
@@ -208,8 +215,8 @@ WRM<-function(formula,family,data,coord,
     }
 
     # GLM for comparison
-    m0 <- glm(formula, family, data)
-    res0 <- resid(m0, type = "pearson")
+    m0 <- stats::glm(formula, family, data)
+    res0 <- stats::resid(m0, type = "pearson")
     beta0 <- m0$coeff
 
 
@@ -253,25 +260,25 @@ WRM<-function(formula,family,data,coord,
       P <- which(is.na(T.array), arr.ind = TRUE)
       if(padform == 0){
         F.mat[is.na(F.mat)] <- 0
-        for (i3 in 1:nvar){
+        for(i3 in seq_len(nvar)){
           i1 <- P[which(P[ ,3] == i3), 1]
           i2 <- P[which(P[ ,3] == i3), 2]
-          for(i in 1:length(i1)) T.array[i1[i], i2[i], i3] <- 0
+          for(i in seq_len(length(i1))) T.array[i1[i], i2[i], i3] <- 0
         }
       }
       if(padform == 1){
         F.mat[is.na(F.mat)] <- mean(F.mat, na.rm = TRUE)
-        for (i3 in 1:nvar){
+        for (i3 in seq_len(nvar)){
           i1 <- P[which(P[ ,3] == i3), 1]
           i2 <- P[which(P[ ,3] == i3), 2]
-          for(i in 1:length(i1)){
+          for(i in seq_len(length(i1))){
             T.array[i1[i], i2[i], i3] <- mean(T.array[,,i3], na.rm = TRUE)
           }
         }
       }
       if(padform == 2){
         F.mat <- padding(F.mat)
-        for (i3 in 1:nvar){
+        for (i3 in seq_len(nvar)){
           T.array[,,i3] <- padding(T.array[,,i3])
         }
       }
@@ -290,18 +297,18 @@ WRM<-function(formula,family,data,coord,
 
       FT <- waveslim::mra.2d(F.mat, wavelet, n.level, method = wtrafo)
       FTS <- rep(0, length(FT[[1]]))
-      for(is in 1:length(s)){
+      for(is in seq_len(length(s))){
         if(s[is] == 1) FTS <- FTS + FT[[is]]
         if(s[is] == 0) FT0 <- FT[[is]]
       }
       ft <- as.vector(FTS)
       if(level != 0) ft0 <- as.vector(FT0)
-      for (i3 in 1:nvar){
+      for (i3 in seq_len(nvar)){
         TT <- waveslim::mra.2d(T.array[,,i3], wavelet, n.level,
                                method = wtrafo)
         TTS <- rep(0, length(TT[[1]]))
         TT0 <- rep(0, length(TT[[1]]))
-        for(is in 1:length(s)){
+        for(is in seq_len(length(s))){
           if(s[is] == 1) TTS <- TTS + TT[[is]]
           if(s[is] == 0) TT0 <- TT[[is]]
         }
@@ -325,9 +332,9 @@ WRM<-function(formula,family,data,coord,
       }
       if(level != 0){
         xnam0 <- paste("tt0[,", 1:nvar, "]", sep = "")
-        formula.dwt0 <- as.formula(paste("ft0~",
-                                         paste(xnam0, collapse = "+"),
-                                         "-1"))
+        formula.dwt0 <- stats::as.formula(paste("ft0~",
+                                                paste(xnam0, collapse = "+"),
+                                                "-1"))
         mdwt0 <- lm(formula.dwt0)
         if(sum(abs(tt0[ ,1])) == 0) mdwt0$coeff[1] <- beta0[1]
       }
@@ -358,7 +365,7 @@ WRM<-function(formula,family,data,coord,
       if(level == 0) Lin <- tt %*% mdwt$coeff
       Lin.Mat <- matrix(Lin, 2^power, 2^power)
       lin <- rep(0,n)
-      for(i in 1:n) lin[i] <- Lin.Mat[y[i] + ymargin, x[i] + xmargin]
+      for(i in seq_len(n)) lin[i] <- Lin.Mat[y[i] + ymargin, x[i] + xmargin]
       if(family == "gaussian") fitted.sm <- lin
       if(family == "binomial") fitted.sm <- exp(lin) / (1 + exp(lin))
       if(family == "poisson")  fitted.sm <- exp(lin)
@@ -368,7 +375,7 @@ WRM<-function(formula,family,data,coord,
       Resmdwt <- matrix(resid(mdwt), 2^power, 2^power)
       resmdwt <- rep(0,n)
 
-      for(i in 1:n) {
+      for(i in seq_len(n)) {
         resmdwt[i] <- Resmdwt[y[i] + ymargin, x[i] + xmargin]
       }
 
@@ -384,7 +391,7 @@ WRM<-function(formula,family,data,coord,
       }
       s.e. <- rep(NA, nvar)
 
-      for(i in 1:nvar){
+      for(i in seq_len(nvar)){
         s.e.[i] <- sqrt(var.b[i,i])
       }
     }
@@ -405,7 +412,7 @@ WRM<-function(formula,family,data,coord,
     se[i4, 1:nvar] <- s.e.[1:nvar]
 
     i4 <- i4 + 1
-  } # i4 loop #..................................................................
+  } # i4 loop #..........................................
 
   glm.beta <- beta0
   wavelet.beta <- apply(beta, 2, mean, na.rm = TRUE)
@@ -431,52 +438,59 @@ WRM<-function(formula,family,data,coord,
   pr <- rep(NA, nvar)
   if(!is.na(wavelet.beta[1]) & !is.na(s.e.[1])) {
     z.value <- wavelet.beta / s.e.
-    for(i in 1:nvar){
+    for(i in seq_len(nvar)){
       if(family == "gaussian"){
-        if(z.value[i] <= 0) pr[i] <- 2 * pt(z.value[i], df)
-        if(z.value[i] > 0)  pr[i] <- 2 * (1 - pt(z.value[i], df))
+        if(z.value[i] <= 0) pr[i] <- 2 * stats::pt(z.value[i], df)
+        if(z.value[i] > 0)  pr[i] <- 2 * (1 - stats::pt(z.value[i], df))
       }
       if(family == "binomial" | family == "poisson"){
-        if(z.value[i] <= 0) pr[i] <- 2 * pnorm(z.value[i])
-        if(z.value[i] > 0)  pr[i] <- 2 * (1 - pnorm(z.value[i]))
+        if(z.value[i] <= 0) pr[i] <- 2 * stats::pnorm(z.value[i])
+        if(z.value[i] > 0)  pr[i] <- 2 * (1 - stats::pnorm(z.value[i]))
       }
     }
   }
 
   if(plot & !is.na(acw[1])){
 
-    plt.blank <- theme(panel.grid.major = element_blank(),
-                       panel.grid.minor = element_blank(),
-                       panel.background = element_blank(),
-                       axis.line = element_line(colour = "black"),
-                       legend.title = (element_text(size = 9)))
+    plt.blank <- ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                                panel.grid.minor = ggplot2::element_blank(),
+                                panel.background = ggplot2::element_blank(),
+                                axis.line = ggplot2::element_line(colour = "black"),
+                                legend.title = ggplot2::element_text(size = 9))
 
-    plt.data <- data.frame(val = 1:length(acw),
+    plt.data <- data.frame(val = seq_len(length(acw)),
                            ac.wrm = acw,
                            ac.glm = ac0)
 
     y.breaks <- round(seq(min(plt.data[ ,2:3]) - .02,
                           max(plt.data[ ,2:3]) + .02,
-                          by = .1), 1)
+                          length.out = 6), 2)
 
-    plt <- ggplot(data = plt.data, aes_(x = quote(val))) +
+    plt <- ggplot2::ggplot(data = plt.data,
+                           ggplot2::aes_(x = quote(val))) +
       plt.blank +
-      geom_line(aes_(y = quote(ac.wrm), color = "WRM Residuals"),
-                size = 0.9) +
-      geom_line(aes_(y = quote(ac.glm), color = "GLM Residuals"),
-                size = 0.9) +
-      geom_point(aes_(y = quote(ac.wrm), color = "WRM Residuals"),
-                 size = 2) +
-      geom_point(aes_(y = quote(ac.glm), color = "GLM Residuals"),
-                 size = 2) +
-      scale_color_manual(paste('Correlation for level = ', level),
-                         breaks = c('WRM Residuals','GLM Residuals'),
-                         values = c('red', 'blue')) +
-      scale_x_continuous('Lag Distance', breaks = 1:10) +
-      scale_y_continuous("Autocorrelation of residuals",
-                         breaks = y.breaks,
-                         limits = c(min(plt.data[ ,2:3]) - .02,
-                                    max(plt.data[ ,2:3]) + .02)) +
+      ggplot2::geom_line(ggplot2::aes_(y = quote(ac.wrm),
+                                       color = "WRM Residuals"),
+                         size = 0.9) +
+      ggplot2::geom_line(ggplot2::aes_(y = quote(ac.glm),
+                                       color = "GLM Residuals"),
+                         size = 0.9) +
+      ggplot2::geom_point(ggplot2::aes_(y = quote(ac.wrm),
+                                        color = "WRM Residuals"),
+                          size = 2) +
+      ggplot2::geom_point(ggplot2::aes_(y = quote(ac.glm),
+                                        color = "GLM Residuals"),
+                          size = 2) +
+      ggplot2::scale_color_manual(paste('Correlation for level = ',
+                                        level),
+                                  breaks = c('WRM Residuals',
+                                             'GLM Residuals'),
+                                  values = c('red', 'blue')) +
+      ggplot2::scale_x_continuous('Lag Distance', breaks = 1:10) +
+      ggplot2::scale_y_continuous("Autocorrelation of residuals",
+                                  breaks = y.breaks,
+                                  limits = c(min(plt.data[ ,2:3]) - .02,
+                                             max(plt.data[ ,2:3]) + .02)) +
       customize_plot
 
     print(plt)

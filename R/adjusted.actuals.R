@@ -25,6 +25,10 @@
 #'coord<- hook[,3:4]
 #'aa<-adjusted.actuals(data,coord,plot.maps=TRUE)
 #'
+#'@importFrom lattice trellis.par.get levelplot trellis.par.set
+#'@importFrom grDevices gray
+#'@importFrom stats dist
+#'
 #'@export
 
 adjusted.actuals<-function(data, coord, plot.maps = FALSE, color.maps = FALSE){
@@ -34,7 +38,9 @@ adjusted.actuals<-function(data, coord, plot.maps = FALSE, color.maps = FALSE){
   fb <- data[ ,1]
   fa <- data[ ,2]
 
-  if(length(x) != length(fa)) stop("coordinates and data have different dimensions")
+  if(length(x) != length(fa)){
+    stop("coordinates and data have different dimensions")
+  }
   logic1 <- identical(as.numeric(x), round(x, 0))
   logic2 <- identical(as.numeric(y), round(y, 0))
   if(!logic1 | !logic2) stop("coordinates not integer")
@@ -46,7 +52,7 @@ adjusted.actuals<-function(data, coord, plot.maps = FALSE, color.maps = FALSE){
     ac01 <- ac01a - ac01b
     if(ac01 > 0.02){
       alpha <- ac01
-      D <- as.matrix(dist(coord))
+      D <- as.matrix(stats::dist(coord))
       R <- alpha^D
       spatial.W <- R^3
       ac01s <- acfft(coord, fbs, lim1 = 0, lim2 = 1, dmax = 1)
@@ -61,9 +67,11 @@ adjusted.actuals<-function(data, coord, plot.maps = FALSE, color.maps = FALSE){
 
   if (plot.maps){
     if(color.maps){
-      colours <- list(colorRampPalette(RColorBrewer::brewer.pal(10, 'Spectral'))(50))
+      colours <- list(
+        colorRampPalette(RColorBrewer::brewer.pal(10, 'Spectral'))(50)
+        )
     } else {
-      colours <- list(rev(gray((0:45)/50)))
+      colours <- list(rev(grDevices::gray((0:45)/50)))
     }
     a <- lattice::levelplot(fa ~ x + y,
                             col.regions = colours[[1]],
