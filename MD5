@@ -1,4 +1,4 @@
-8c7ff356f87b53b73f046a988194ccf7 *DESCRIPTION
+d3e35013a23cb3ce9b29dc89a67efd9b *DESCRIPTION
 6fc3c8faf9ab42c4fd74919ebf05b5df *NAMESPACE
 47bb60b747d79abbb0c3bf04399566e8 *R/AIC_Calc.R
 54556a8a42aac76b1d966024dbdd4b95 *R/GEE.R
@@ -30,10 +30,10 @@ ee8c952e3cdb3a3b3d90e74af4d5eea8 *build/vignette.rds
 61b7a5aba62616ec55debefd95b0e75b *data/carlinadata.rda
 cfd3c36baf85966c1774aa7b56bf191e *data/hook.rda
 b1b9eb97d3d4006a10d938ede6ac9726 *data/musdata.rda
-b7e6c141017583fabd7572c38f3c8ded *inst/CITATION
+b8c7f0b168e7d9a1ceb4f82c103cdc11 *inst/CITATION
 18f41eb95f4a311b4fa152c8c24fd468 *inst/doc/spind_vignette.R
 3781ce4797105f21740918ef592c9545 *inst/doc/spind_vignette.Rmd
-1aff32c42aadb3f5774bc7309696c50d *inst/doc/spind_vignette.html
+fcf59ea3180f6d52781a65dc039136d7 *inst/doc/spind_vignette.html
 49b956d6435065c6ca2416dc6183e365 *man/GEE.Rd
 c0adb4e02f15bff09af9d50641d11fd0 *man/WRM.Rd
 9ad3f64d01198f75bf9ba35c08f6e4d6 *man/acfft.Rd
