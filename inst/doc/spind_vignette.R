@@ -21,18 +21,35 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 coords <- musdata[ ,4:5]
 
 mgee <- GEE(musculus ~ pollution + exposure, family = "poisson", data = musdata,
-            coord = coords, corstr = "fixed", plot = TRUE, scale.fix = FALSE,
-            customize_plot = scale_color_manual("Custom Legend", values = c('green', 'black')))
+            coord = coords, corstr = "fixed", scale.fix = FALSE)
 
 summary(mgee, printAutoCorPars = TRUE)
 
+plot(mgee)
+
 predictions <- predict(mgee, newdata = musdata)
+
+# you can modify the plot itself by extracting it from the plot object and
+# treating it as any other ggplot object.
+
+library(ggplot2)
+my_plot <- mgee$plot
+
+# more of a base-R graphic feel
+my_plot + 
+  theme(plot.background = element_rect(fill = NA,
+                                       color = 'black',
+                                       size = 1.25))
+
+
 
 ## ----WRM Example, fig.width = 7.15, fig.height = 5-----------------------
 
 
 mwrm <- WRM(musculus ~ pollution + exposure, family = "poisson",
-            data = musdata, coord = coords, level = 1, plot = TRUE)
+            data = musdata, coord = coords, level = 1)
+
+plot(mwrm)
 
 summary(mwrm)
 
@@ -43,19 +60,27 @@ predictions <- predict(mwrm, newdata = musdata)
 
 coords <- carlinadata[ ,4:5]
 
-covar.plot(carlina.horrida ~ aridity + land.use - 1,
-           data = carlinadata, coord = coords, wavelet = "d4",
-           wtrafo = 'modwt', plot = 'covar')
+wave_covariance <- covar.plot(carlina.horrida ~ aridity + land.use - 1,
+                              data = carlinadata, coord = coords, wavelet = "d4",
+                              wtrafo = 'modwt', plot = 'covar')
 
-covar.plot(carlina.horrida ~ aridity + land.use - 1,
-           data = carlinadata, coord = coords, wavelet = "d4",
-           wtrafo = 'modwt', plot = 'var')
+wave_variance <- covar.plot(carlina.horrida ~ aridity + land.use - 1,
+                            data = carlinadata, coord = coords, wavelet = "d4",
+                            wtrafo = 'modwt', plot = 'var')
+
+wave_variance$result
+wave_covariance$result
+
+# view plots side by side
+
+library(gridExtra)
+grid.arrange(wave_variance$plot, wave_covariance$plot)
 
 
 ## ----Upscale Example, fig.width = 7.15, fig.height = 7-------------------
 
 upscale(carlinadata$land.use, coord = coords,
-        pad = mean(carlinadata$land.use), color.maps = FALSE)
+        pad = mean(carlinadata$land.use))
 
 
 
@@ -130,9 +155,12 @@ mmi <- mmiGEE(mgee, birthwt)
 data(carlinadata)
 coords <- carlinadata[ ,4:5]
 
-rvi.plot(carlina.horrida ~ aridity + land.use, family = "poisson",
-         data = carlinadata, coord = coords, maxlevel = 4, 
-         detail = TRUE, wavelet = "d4")
+rvi <- rvi.plot(carlina.horrida ~ aridity + land.use, family = "poisson",
+                data = carlinadata, coord = coords, maxlevel = 4, 
+                detail = TRUE, wavelet = "d4")
+
+rvi$rvi
+rvi$plot
 
 
 ## ----GOF data, eval = FALSE----------------------------------------------
@@ -159,13 +187,16 @@ th.dep.indices$kappa
 
 # Threshold independent metrics
 th.indep.indices <- th.indep(data = df, coord = coords, 
-                             spatial = TRUE, plot.ROC = TRUE)
+                             spatial = TRUE)
 
 # AUC
 th.indep.indices$AUC
 
 # TSS
 th.indep.indices$TSS
+
+# AUC plot
+th.indep.indices$plot
 
 
 

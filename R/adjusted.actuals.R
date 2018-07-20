@@ -8,12 +8,13 @@
 #'0 or 1) values in 1st column and predicted values (numeric between 0 and 1)
 #'in 2nd column.
 #'@param coord a matrix of two columns of the same length providing integer,
-#'consecutively numbered coordinates for each occurence and prediction in
+#'consecutively numbered coordinates for each occurrence and prediction in
 #'\code{data}.
 #'@param plot.maps A logical indicating whether maps should be plotted.
 #'Default is FALSE.
 #' @param color.maps A logical value. If \code{TRUE}, produces colorful maps.
-#' If \code{FALSE}, produces grayscale maps. Default is grayscale.
+#' If \code{FALSE}, produces grayscale maps. Default is grayscale. NOW DEPRECATED,
+#' color maps will not be produced in future versions.
 #'
 #'@return A vector of adjusted actual values.
 #'
@@ -21,9 +22,9 @@
 #'
 #'@examples
 #'data(hook)
-#'data<- hook[,1:2]
-#'coord<- hook[,3:4]
-#'aa<-adjusted.actuals(data,coord,plot.maps=TRUE)
+#'data <- hook[ ,1:2]
+#'coord <- hook[ ,3:4]
+#'aa <- adjusted.actuals(data, coord, plot.maps = TRUE)
 #'
 #'@importFrom lattice trellis.par.get levelplot trellis.par.set
 #'@importFrom grDevices gray
@@ -70,6 +71,9 @@ adjusted.actuals<-function(data, coord, plot.maps = FALSE, color.maps = FALSE){
       colours <- list(
         colorRampPalette(RColorBrewer::brewer.pal(10, 'Spectral'))(50)
         )
+
+      warning('"color.maps" is now soft deprecated and will be removed in future versions')
+
     } else {
       colours <- list(rev(grDevices::gray((0:45)/50)))
     }

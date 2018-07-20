@@ -48,19 +48,26 @@
 #' # data (for demonstration only)
 #' library(MASS)
 #' data(birthwt)
+#'
 #' # impose an artificial (not fully appropriate) grid structure
-#' x<-rep(1:14,14)
-#' y<-as.integer(gl(14,14))
-#' coords<-cbind(x[-(190:196)],y[-(190:196)])
+#'
+#' x <- rep(1:14, 14)
+#' y <- as.integer(gl(14, 14))
+#' coords <- cbind(x[-(190:196)], y[-(190:196)])
 #'
 #'\dontrun{
 #'
-#' formula<-formula(low ~ race + smoke +  bwt)
+#' formula <- formula(low ~ race + smoke +  bwt)
 #'
-#' mgee<-GEE(formula, family = "gaussian", data = birthwt,
-#'          coord=coords, corstr="fixed",scale.fix=TRUE)
+#' mgee <- GEE(formula,
+#'             family = "gaussian",
+#'             data = birthwt,
+#'             coord = coords,
+#'             corstr = "fixed",
+#'             scale.fix = TRUE)
 #'
-#' mmi<-mmiGEE(mgee,birthwt)
+#' mmi <- mmiGEE(mgee, birthwt)
+#'
 #'}
 #' @importFrom stats update reformulate drop.terms model.matrix as.formula terms
 #' @importFrom rje powerSetMat
@@ -71,7 +78,7 @@
 mmiGEE<-function(object,data, trace = FALSE){
 
 
-  if(class(object)!="GEE") stop("Input model is not of class 'GEE'")
+  if(!inherits(object, "GEE")) stop("Input model is not of class 'GEE'")
 
   family<-object$family
   formula<-object$formula

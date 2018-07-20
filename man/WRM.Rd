@@ -2,11 +2,20 @@
 % Please edit documentation in R/WRM.R
 \name{WRM}
 \alias{WRM}
+\alias{plot.WRM}
+\alias{summary.WRM}
+\alias{predict.WRM}
 \title{Wavelet-revised models (WRMs)}
 \usage{
 WRM(formula, family, data, coord, level = 1, wavelet = "haar",
   wtrafo = "dwt", b.ini = NULL, pad = list(), control = list(),
   moran.params = list(), plot = FALSE, customize_plot = NULL)
+
+\method{plot}{WRM}(x, ...)
+
+\method{summary}{WRM}(object, ...)
+
+\method{predict}{WRM}(object, newdata, sm = FALSE, newcoord = NA, ...)
 }
 \arguments{
 \item{formula}{Model formula. Variable names must match variables in \code{data}.}
@@ -65,9 +74,22 @@ are possible. \code{haar} is the default.}
 }}
 
 \item{plot}{A logical value indicating whether to plot autocorrelation of
-residuals by distance bin}
+residuals by distance bin. NOW DEPRECATED in favor of \code{plot.WRM} method.}
 
-\item{customize_plot}{Additional plotting parameters passed to \code{ggplot}}
+\item{customize_plot}{Additional plotting parameters passed to \code{ggplot}.
+NOW DEPRECATED in favor of \code{plot.WRM} method.}
+
+\item{x}{An object of class \code{GEE} or \code{WRM}}
+
+\item{...}{Not used}
+
+\item{object}{An object of class \code{WRM}}
+
+\item{newdata}{A data frame containing variables used to make predictions.}
+
+\item{sm}{Logical. Should part of smooth components be included?}
+
+\item{newcoord}{New coordinates corresponding to observations in \code{newdata}.}
 }
 \value{
 An object of class \code{WRM}. This consists of a list with the
@@ -100,6 +122,9 @@ following elements:
       \item{\code{control}}{Control parameters for the fitting process}
       \item{\code{moran.params}}{Parameters for calculating Moran's I}
       \item{\code{pad}}{List of parameters for padding wavelet coefficients}
+      \item{\code{plot}}{An object of class \code{ggplot} containing information
+      on the autocorrelation of residuals from the fitted \code{WRM} and a
+      \code{GLM}}
 }
 }
 \description{
@@ -114,24 +139,39 @@ As a spatial model, it is a generalized linear model in which the residuals
 may be autocorrelated. It corrects for  2-dimensional residual
 autocorrelation for regular gridded data sets using the wavelet
 decomposition technique. The grid cells are assumed to be square.
-Futhermore, this function requires that \strong{all predictor variables
+Furthermore, this function requires that \strong{all predictor variables
 be continuous}.
 }
 \note{
-For those interested in multimodel inference approaches \code{WRM} with
-\code{level}=1 is identical to \code{mmiWMRR} with \code{scale}=1.
+For those interested in multimodel inference approaches, \code{WRM} with
+\code{level = 1} is identical to \code{mmiWMRR} with \code{scale = 1}.
 }
 \examples{
 data(musdata)
-coords<- musdata[,4:5]
+coords <- musdata[,4:5]
 
 \dontrun{
-mwrm<-WRM(musculus ~ pollution + exposure, "poisson", musdata,
-coord=coords, level=1, plot=TRUE,
-customize_plot = scale_color_manual("Custom legend", values = c('blue','red')))
+mwrm <- WRM(musculus ~ pollution + exposure,
+            family = "poisson",
+            data = musdata,
+            coord = coords,
+            level = 1)
+
+pred <- predict(mwrm, newdata = musdata)
 
 summary(mwrm)
+
+plot(mwrm)
+
+library(ggplot2)
+
+my_wrm_plot <- mwrm$plot
+
+# increase axis text size
+print(my_wrm_plot + ggplot2::theme(axis.text = element_text(size = 15)))
+
 }
+
 }
 \references{
 Carl, G., Kuehn, I. (2010): A wavelet-based extension of generalized

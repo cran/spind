@@ -4,25 +4,25 @@
 \alias{th.indep}
 \title{Spatial threshold-independent accuracy measures}
 \usage{
-th.indep(data, coord, spatial = TRUE, plot.ROC = TRUE,
+th.indep(data, coord, spatial = TRUE, plot.ROC = FALSE,
   customize_plot = NULL)
 }
 \arguments{
 \item{data}{A data frame or matrix with two columns. The first column
 should contain actual presence/absence data (binary, 0 or 1) and the
 second column should contain model predictions of probability of
-occurence (numeric, between 0 and 1).}
+occurrence (numeric, between 0 and 1).}
 
 \item{coord}{A data frame or matrix with two columns containing x,y
 coordinates for each actual and predicted value. Coordinates must be
 integer and consecutively numbered.}
 
 \item{spatial}{A logical value indicating whether spatial corrected
-indices (rather than classical indices) should be computed}
+indices (rather than classical indices) should be computed.}
 
-\item{plot.ROC}{A logical indicating whether the ROC should be plotted}
+\item{plot.ROC}{A logical indicating whether the ROC should be plotted. NOW DEPRECATED.}
 
-\item{customize_plot}{Additional plotting parameters passed to \code{ggplot}}
+\item{customize_plot}{Additional plotting parameters passed to \code{ggplot}. NOW DEPRECATED.}
 }
 \value{
 A list with the following components:
@@ -32,6 +32,7 @@ A list with the following components:
  \item{\code{TSS}}{Maximum TSS value}
  \item{\code{sensitivity}}{Sensitivity}
  \item{\code{Specificity}}{Specificity}
+ \item{\code{AUC.plot}}{A \code{ggplot} object}
 }
 }
 \description{
@@ -46,12 +47,13 @@ si2 <- th.indep(data, coord, spatial = TRUE)
 si2$AUC
 si2$TSS
 si2$opt.thresh
+si2$plot
 
 }
 \references{
 Carl G, Kuehn I (2017) Spind: a package for computing spatially
  corrected accuracy measures. Ecography 40: 675-682.
- doi: 10.1111/ecog.02593
+ DOI: 10.1111/ecog.02593
 }
 \seealso{
 \code{\link{th.dep}}

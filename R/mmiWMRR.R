@@ -11,7 +11,7 @@
 #' regressions (i.e. where \code{\link{scaleWMRR}} can be used). AIC is
 #' used to obtain model
 #' selection weights and to rank the models.
-#' Futhermore, this function requires that \strong{all predictor variables
+#' Furthermore, this function requires that \strong{all predictor variables
 #' be continuous}.
 #'
 #'
@@ -41,15 +41,22 @@
 #'
 #' data(carlinadata)
 #' coords <- carlinadata[ ,4:5]
+#'
 #' \dontrun{
 #'
 #'
-#' wrm<- WRM(carlina.horrida ~ aridity + land.use, family = "poisson",
-#'           data = carlinadata, coord = coords, level = 1,
-#'           wavelet = "d4")
+#' wrm <- WRM(carlina.horrida ~ aridity + land.use,
+#'            family = "poisson",
+#'            data = carlinadata,
+#'            coord = coords,
+#'            level = 1,
+#'            wavelet = "d4")
 #'
-#' mmi<- mmiWMRR(wrm, data = carlinadata, scale = 3,
-#'               detail = TRUE, trace = FALSE)
+#' mmi <- mmiWMRR(wrm,
+#'                data = carlinadata,
+#'                scale = 3,
+#'                detail = TRUE,
+#'                trace = FALSE)
 #'
 #'}
 #' @references

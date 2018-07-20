@@ -100,24 +100,46 @@ results for data sampled on a contiguous geographical area. The
 dataset is assumed to be regular gridded and the grid cells are
 assumed to be square. A function from the package 'waveslim' is used
 for the wavelet transformations (Whitcher, 2005).
-Futhermore, this function requires that \strong{all predictor variables
+Furthermore, this function requires that \strong{all predictor variables
 be continuous}.
 }
 \examples{
+
 data(carlinadata)
-coords<- carlinadata[,4:5]
+coords <- carlinadata[ ,4:5]
+
 \dontrun{
 
-# scaleWMRR at scale=0 is equivalent to GLM
-ms0<-scaleWMRR(carlina.horrida ~ aridity + land.use,"poisson",
-               carlinadata,coords,scale=0,trace=TRUE)
+# scaleWMRR at scale = 0 is equivalent to GLM
+
+ms0 <- scaleWMRR(carlina.horrida ~ aridity + land.use,
+                 family = "poisson",
+                 data = carlinadata,
+                 coord = coords,
+                 scale = 0,
+                 trace = TRUE)
+
 # scale-specific regressions for detail components
-ms1<-scaleWMRR(carlina.horrida ~ aridity + land.use,"poisson",
-               carlinadata,coords,scale=1,trace=TRUE)
-ms2<-scaleWMRR(carlina.horrida ~ aridity + land.use,"poisson",
-               carlinadata,coords,scale=2,trace=TRUE)
-ms3<-scaleWMRR(carlina.horrida ~ aridity + land.use,"poisson",
-               carlinadata,coords,scale=3,trace=TRUE)
+ms1 <- scaleWMRR(carlina.horrida ~ aridity + land.use,
+                 family = "poisson",
+                 data = carlinadata,
+                 coord = coords,
+                 scale = 1,
+                 trace = TRUE)
+
+ms2 <- scaleWMRR(carlina.horrida ~ aridity + land.use,
+                 family = "poisson",
+                 data = carlinadata,
+                 coord = coords,
+                 scale = 2,
+                 trace = TRUE)
+
+ms3<- scaleWMRR(carlina.horrida ~ aridity + land.use,
+                 family = "poisson",
+                 data = carlinadata,
+                 coord = coords,
+                 scale = 3,
+                 trace = TRUE)
 
 }
 }
