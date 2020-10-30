@@ -1,10 +1,10 @@
-## ----Library call, echo=FALSE--------------------------------------------
+## ----Library call, echo=FALSE-------------------------------------------------
 library(spind)
 library(ggplot2)
 
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
-## ----GEE Data Infiling, eval=FALSE---------------------------------------
+## ----GEE Data Infiling, eval=FALSE--------------------------------------------
 #  data(musdata)
 #  data(carlinadata)
 #  
@@ -16,7 +16,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 #  head(carlinadata)
 #  
 
-## ----GEE Example, fig.width=7.15,fig.height=5----------------------------
+## ----GEE Example, fig.width=7.15,fig.height=5---------------------------------
 # Next, fit a simple GEE and view the output
 coords <- musdata[ ,4:5]
 
@@ -43,7 +43,7 @@ my_plot +
 
 
 
-## ----WRM Example, fig.width = 7.15, fig.height = 5-----------------------
+## ----WRM Example, fig.width = 7.15, fig.height = 5----------------------------
 
 
 mwrm <- WRM(musculus ~ pollution + exposure, family = "poisson",
@@ -56,7 +56,7 @@ summary(mwrm)
 predictions <- predict(mwrm, newdata = musdata)
 
 
-## ----Covar.plot Example, fig.width = 7.15, fig.height = 5----------------
+## ----Covar.plot Example, fig.width = 7.15, fig.height = 5---------------------
 
 coords <- carlinadata[ ,4:5]
 
@@ -77,14 +77,14 @@ library(gridExtra)
 grid.arrange(wave_variance$plot, wave_covariance$plot)
 
 
-## ----Upscale Example, fig.width = 7.15, fig.height = 7-------------------
+## ----Upscale Example, fig.width = 7.15, fig.height = 7------------------------
 
 upscale(carlinadata$land.use, coord = coords,
         pad = mean(carlinadata$land.use))
 
 
 
-## ----Step.spind Example--------------------------------------------------
+## ----Step.spind Example-------------------------------------------------------
 
 # For demonstration only. We are artificially imposing a grid structure
 # on data that is not actually spatial data
@@ -118,7 +118,7 @@ summary(best.mgee, printAutoCorPars = FALSE)
 summary(best.wrm)
 
 
-## ----mmi... example------------------------------------------------------
+## ----mmi... example-----------------------------------------------------------
 
 # Example for WRMs
 data(carlinadata)
@@ -151,7 +151,7 @@ mmi <- mmiGEE(mgee, birthwt)
 
 
 
-## ----RVI.plot Example, fig.width=7.15, fig.height=5----------------------
+## ----RVI.plot Example, fig.width=7.15, fig.height=5---------------------------
 data(carlinadata)
 coords <- carlinadata[ ,4:5]
 
@@ -163,7 +163,7 @@ rvi$rvi
 rvi$plot
 
 
-## ----GOF data, eval = FALSE----------------------------------------------
+## ----GOF data, eval = FALSE---------------------------------------------------
 #  data(hook)
 #  
 #  # Familiarize yourself with the data
@@ -171,7 +171,7 @@ rvi$plot
 #  head(hook)
 #  
 
-## ----Spatial Indices Example, fig.width = 7.15, fig.height = 5-----------
+## ----Spatial Indices Example, fig.width = 7.15, fig.height = 5----------------
 
 df <- hook[ ,1:2]
 coords <- hook[ ,3:4]
@@ -201,7 +201,7 @@ th.indep.indices$plot
 
 
 
-## ----ACFFT example-------------------------------------------------------
+## ----ACFFT example------------------------------------------------------------
 
 coords <- musdata[ ,4:5]
 mglm <- glm(musculus ~ pollution + exposure, family = "poisson",
